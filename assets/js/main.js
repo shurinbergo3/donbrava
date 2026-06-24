@@ -203,7 +203,14 @@
       document.body.style.overflow = "";
       setTimeout(() => { frame.innerHTML = ""; }, 420);
     };
-    $$("[data-yt]").forEach((el) => el.addEventListener("click", (e) => { e.preventDefault(); open(el.getAttribute("data-yt")); }));
+    $$("[data-yt]").forEach((el) => {
+      el.addEventListener("click", (e) => { e.preventDefault(); open(el.getAttribute("data-yt")); });
+      if (el.getAttribute("role") === "button") {
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(el.getAttribute("data-yt")); }
+        });
+      }
+    });
     closeBtn.addEventListener("click", close);
     lb.addEventListener("click", (e) => { if (e.target === lb) close(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && lb.classList.contains("open")) close(); });
@@ -273,6 +280,22 @@
     });
   }
 
+  /* ---------- journal sidebar categories ---------- */
+  const catLinks = $$(".cat-nav .cat-link");
+  if (catLinks.length) {
+    const cards = $$(".jcard");
+    catLinks.forEach((link) => {
+      link.addEventListener("click", () => {
+        catLinks.forEach((l) => l.classList.remove("on"));
+        link.classList.add("on");
+        const cat = link.dataset.cat;
+        cards.forEach((card) => {
+          card.hidden = !(cat === "all" || card.dataset.cat === cat);
+        });
+      });
+    });
+  }
+
   /* ---------- segmented (messenger choice) ---------- */
   $$(".seg").forEach((seg) => {
     const buttons = $$("button", seg);
@@ -312,6 +335,113 @@
     );
   }
 
+  /* ---------- reviews wall expand/collapse ---------- */
+  const rvWall = $("#rvWall");
+  const rvToggle = $("#rvToggle");
+  if (rvWall && rvToggle) {
+    const txt = $(".rv-more-txt", rvToggle);
+    rvToggle.addEventListener("click", () => {
+      const collapsed = rvWall.classList.toggle("is-collapsed");
+      rvToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      if (txt) txt.textContent = collapsed ? "Показать все 209 отзывов" : "Свернуть отзывы";
+      if (collapsed) {
+        const top = $("#reviews");
+        if (top) window.scrollTo({ top: top.offsetTop - 80, behavior: reduce ? "auto" : "smooth" });
+      }
+    });
+  }
+
+  /* ---------- star rating input ---------- */
+  const rvRate = $("#rvRate");
+  if (rvRate) {
+    const starsBtn = $$(".rv-rate-st", rvRate);
+    const hidden = $("#rvRating");
+    const paint = (n, cls) => starsBtn.forEach((b, i) => b.classList.toggle(cls, i < n));
+    const setVal = (n) => {
+      paint(n, "on");
+      starsBtn.forEach((b, i) => b.setAttribute("aria-checked", i + 1 === n ? "true" : "false"));
+      if (hidden) hidden.value = String(n);
+      const f = rvRate.closest(".field");
+      if (f) f.classList.remove("invalid");
+    };
+    starsBtn.forEach((b) => {
+      const v = parseInt(b.dataset.v, 10);
+      b.addEventListener("mouseenter", () => paint(v, "hot"));
+      b.addEventListener("click", () => setVal(v));
+      b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setVal(v); } });
+    });
+    rvRate.addEventListener("mouseleave", () => paint(0, "hot"));
+  }
+
+  /* ---------- review submit ---------- */
+  const rvForm = $("#reviewForm");
+  if (rvForm) {
+    const palette = ["#1a73e8", "#d93025", "#188038", "#e37400", "#9334e6", "#12805c", "#c5221f", "#00639b", "#b06000"];
+    const validate = () => {
+      let ok = true;
+      $$(".field[data-required]", rvForm).forEach((f) => {
+        const inp = $("input, textarea", f);
+        const valid = inp && inp.value.trim().length > 1;
+        f.classList.toggle("invalid", !valid);
+        if (!valid) ok = false;
+      });
+      const rf = $(".field[data-required-rating]", rvForm);
+      if (rf) {
+        const r = $("#rvRating").value;
+        const valid = r && parseInt(r, 10) > 0;
+        rf.classList.toggle("invalid", !valid);
+        if (!valid) ok = false;
+      }
+      return ok;
+    };
+    rvForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!validate()) {
+        const first = $(".field.invalid input, .field.invalid textarea", rvForm);
+        if (first) first.focus();
+        return;
+      }
+      const name = $("#rvName").value.trim();
+      const text = $("#rvText").value.trim();
+      const rating = parseInt($("#rvRating").value, 10) || 5;
+      const cols = $(".rv-columns");
+      if (cols) {
+        const card = document.createElement("article");
+        card.className = "gr-card";
+        const init = name.charAt(0).toUpperCase();
+        const color = palette[(name.length + init.charCodeAt(0)) % palette.length];
+        let stars = "";
+        for (let i = 1; i <= 5; i++) stars += '<i class="' + (i <= rating ? "on" : "") + '">★</i>';
+        card.innerHTML =
+          '<div class="gr-top"><span class="gr-av" style="background:' + color + '">' + init + "</span>" +
+          '<span class="gr-meta"><span class="gr-name">' + escapeHtml(name) + '</span><span class="gr-sub">только что</span></span>' +
+          '<span class="gr-src" aria-hidden="true"></span></div>' +
+          '<div class="gr-stars" role="img" aria-label="Оценка ' + rating + ' из 5">' + stars + "</div>" +
+          '<p class="gr-text">' + escapeHtml(text) + "</p>";
+        card.style.animation = "fadeUp .5s var(--ease) both";
+        cols.insertBefore(card, cols.firstChild);
+        if (rvWall && rvWall.classList.contains("is-collapsed")) {
+          rvWall.classList.remove("is-collapsed");
+          if (rvToggle) {
+            rvToggle.setAttribute("aria-expanded", "true");
+            const t = $(".rv-more-txt", rvToggle);
+            if (t) t.textContent = "Свернуть отзывы";
+          }
+        }
+      }
+      rvForm.style.display = "none";
+      const done = $("#rvFormDone");
+      if (done) done.classList.add("on");
+    });
+    $$(".field input, .field textarea", rvForm).forEach((inp) =>
+      inp.addEventListener("input", () => inp.closest(".field").classList.remove("invalid"))
+    );
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
   /* ---------- newsletter ---------- */
   const nl = $("#nlForm");
   if (nl) {
@@ -328,6 +458,11 @@
 
   /* ---------- footer year ---------- */
   $$("[data-year]").forEach((el) => (el.textContent = new Date().getFullYear()));
+
+  /* ---------- made-by link: point non-RU versions to the global site ---------- */
+  if (document.documentElement.lang !== "ru") {
+    $$(".madeby").forEach((a) => (a.href = "https://buildbyalex.com/"));
+  }
 
   /* ---------- quiz ---------- */
   initQuiz();

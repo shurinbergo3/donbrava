@@ -87,15 +87,44 @@
   /* ---------- magnetic buttons ---------- */
   if (!reduce && window.matchMedia("(pointer:fine)").matches) {
     $$("[data-magnetic]").forEach((el) => {
-      const strength = 0.32;
+      const strength = 0.22; // насколько сильно тянется к курсору
+      const ease = 0.15;     // плавность догона (меньше = мягче)
+      const lift = 2;        // лёгкий подъём при наведении, px
+      let tx = 0, ty = 0;    // целевые
+      let cx = 0, cy = 0;    // текущие
+      let raf = null, active = false;
+
+      const loop = () => {
+        cx += (tx - cx) * ease;
+        cy += (ty - cy) * ease;
+        const done = Math.abs(tx - cx) < 0.1 && Math.abs(ty - cy) < 0.1;
+        if (done) { cx = tx; cy = ty; }
+        if (!active && done) {
+          el.style.transform = "";   // вернулись в исходную точку
+          el.style.transition = "";  // отдаём управление обратно CSS
+          raf = null;
+          return;
+        }
+        const liftY = active ? cy - lift : cy;
+        el.style.transform = `translate3d(${cx.toFixed(2)}px, ${liftY.toFixed(2)}px, 0)`;
+        raf = requestAnimationFrame(loop);
+      };
+      const start = () => { if (!raf) raf = requestAnimationFrame(loop); };
+
+      el.addEventListener("mouseenter", () => {
+        active = true;
+        el.style.transition = "none"; // движение целиком ведёт rAF
+        start();
+      });
       el.addEventListener("mousemove", (ev) => {
         const r = el.getBoundingClientRect();
-        const x = ev.clientX - r.left - r.width / 2;
-        const y = ev.clientY - r.top - r.height / 2;
-        el.style.transform = `translate(${x * strength}px, ${y * strength}px)`;
+        tx = (ev.clientX - r.left - r.width / 2) * strength;
+        ty = (ev.clientY - r.top - r.height / 2) * strength;
       });
       el.addEventListener("mouseleave", () => {
-        el.style.transform = "";
+        active = false;
+        tx = 0; ty = 0;
+        start();
       });
     });
   }

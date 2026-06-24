@@ -869,8 +869,9 @@ strong { font-weight: 700; color: var(--ink); }
   .founder-tag { justify-content:center; gap:18px; }
   .founder-plate { justify-items:center; }
   .stamp { right:-2px; top:18px; width:74px; height:74px; }
-  .hero-cta { flex-direction:column; align-items:flex-start; gap:18px; }
-  .hero-cta .btn { width:100%; }
+  .hero-cta { flex-direction:column; align-items:flex-start; gap:16px; }
+  .hero-cta .btn { width:auto; align-self:flex-start; }
+  .hero-cta .btn--lg { padding:.92em 1.6em; font-size:.9rem; }
   .hero-figures { grid-template-columns:1fr 1fr; gap:24px 28px; }
   .hero-figures .fig:last-child { grid-column:1 / -1; }
   .h1 { font-size: clamp(2.2rem, 9vw, 3.1rem); }

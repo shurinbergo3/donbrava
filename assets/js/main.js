@@ -431,6 +431,7 @@
         return;
       }
       const name = $("#rvName").value.trim();
+      const from = ($("#rvFrom") ? $("#rvFrom").value.trim() : "");
       const text = $("#rvText").value.trim();
       const rating = parseInt($("#rvRating").value, 10) || 5;
       const cols = $(".rv-columns");
@@ -441,9 +442,10 @@
         const color = palette[(name.length + init.charCodeAt(0)) % palette.length];
         let stars = "";
         for (let i = 1; i <= 5; i++) stars += '<i class="' + (i <= rating ? "on" : "") + '">★</i>';
+        const sub = from ? escapeHtml(from) + " · только что" : "только что";
         card.innerHTML =
           '<div class="gr-top"><span class="gr-av" style="background:' + color + '">' + init + "</span>" +
-          '<span class="gr-meta"><span class="gr-name">' + escapeHtml(name) + '</span><span class="gr-sub">только что</span></span>' +
+          '<span class="gr-meta"><span class="gr-name">' + escapeHtml(name) + '</span><span class="gr-sub">' + sub + '</span></span>' +
           '<span class="gr-src" aria-hidden="true"></span></div>' +
           '<div class="gr-stars" role="img" aria-label="Оценка ' + rating + ' из 5">' + stars + "</div>" +
           '<p class="gr-text">' + escapeHtml(text) + "</p>";

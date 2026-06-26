@@ -367,15 +367,37 @@
   /* ---------- reviews wall expand/collapse ---------- */
   const rvWall = $("#rvWall");
   const rvToggle = $("#rvToggle");
+  const rvFormWrap = $("#review-form");
   if (rvWall && rvToggle) {
     const txt = $(".rv-more-txt", rvToggle);
     rvToggle.addEventListener("click", () => {
       const collapsed = rvWall.classList.toggle("is-collapsed");
       rvToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
       if (txt) txt.textContent = collapsed ? "Показать все 209 отзывов" : "Свернуть отзывы";
+      if (!collapsed && rvFormWrap) rvFormWrap.classList.add("in");
       if (collapsed) {
         const top = $("#reviews");
         if (top) window.scrollTo({ top: top.offsetTop - 80, behavior: reduce ? "auto" : "smooth" });
+      }
+    });
+  }
+
+  /* ---------- "leave a review" CTA expands reviews first ---------- */
+  const rvScoreCta = $(".rv-score-cta");
+  if (rvScoreCta && rvWall) {
+    rvScoreCta.addEventListener("click", (e) => {
+      if (rvWall.classList.contains("is-collapsed")) {
+        rvWall.classList.remove("is-collapsed");
+        if (rvToggle) {
+          rvToggle.setAttribute("aria-expanded", "true");
+          const t = $(".rv-more-txt", rvToggle);
+          if (t) t.textContent = "Свернуть отзывы";
+        }
+      }
+      if (rvFormWrap) {
+        rvFormWrap.classList.add("in");
+        e.preventDefault();
+        window.scrollTo({ top: rvFormWrap.offsetTop - 80, behavior: reduce ? "auto" : "smooth" });
       }
     });
   }

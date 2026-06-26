@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,600;1,9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/styles.css?v=18">
+<link rel="stylesheet" href="assets/css/styles.css?v=19">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -3273,7 +3273,7 @@
     <div class="tb-right">
       <a href="tel:+421940750691" class="ico-link">+421 940 750 691</a>
       <span class="lang" style="display:inline-flex">
-        <button class="on">RU</button><button>SK</button><button>EN</button><button class="soon" disabled title="Скоро">UA</button>
+        <button class="on">RU</button><button class="soon" disabled title="Скоро">UA</button>
       </span>
     </div>
   </div>
@@ -3407,16 +3407,20 @@
 </div>
 
 <!-- quiz / подбор -->
-<section class="section bg-2" id="quiz">
+<section class="section quiz-section" id="quiz">
   <div class="container">
-    <div class="quiz-grid">
+    <div class="quiz-grid quiz-shell">
       <div class="quiz-intro">
+        <span class="qi-glow" aria-hidden="true"></span>
         <span class="eyebrow"><span class="section-num">01</span> Подбор услуги</span>
         <h2 class="h2" data-reveal>Не знаете, с чего начать?</h2>
         <p data-reveal data-d="1">Ответьте на три коротких вопроса - подскажем подходящую услугу и дадим конкретный следующий шаг. Без обязательств и навязывания.</p>
-        <div class="quiz-progress" data-reveal data-d="2">
-          <span>Вопрос <span class="q-count">1</span> из 3</span>
-          <span class="bar"><i style="width:0"></i></span>
+        <div class="quiz-intro-foot">
+          <div class="quiz-progress" data-reveal data-d="2">
+            <span>Вопрос <span class="q-count">1</span> из 3</span>
+            <span class="bar"><i style="width:0"></i></span>
+          </div>
+          <span class="qi-note">Займёт меньше минуты · без обязательств</span>
         </div>
       </div>
 
